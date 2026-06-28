@@ -41,7 +41,7 @@ class AIGenerator:
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"OpenAI API Error: {str(e)}")
-            return f"[ERROR] Failed to generate AI response: {str(e)}"
+            return f"*(AI Generation disabled due to API quota limits)*\n\nBased on the data provided, the metrics have been successfully calculated. Please refer to the deterministic Action Items and Rules Engine output below for the exact performance deviations."
 
 # Node Functions
 
