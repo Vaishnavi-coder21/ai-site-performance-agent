@@ -22,15 +22,21 @@ class AIGenerator:
     """Helper to call OpenAI API to generate text."""
     @staticmethod
     def generate(prompt: str, max_tokens: int = 800) -> str:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key or api_key == "your_openai_api_key_here":
-            logger.warning("No valid OpenAI API key found. Returning mock AI response.")
-            return f"[MOCK AI RESPONSE] Processed prompt: {prompt[:50]}..."
+        # Check for GROQ API key first, then fallback to OPENAI API KEY for backward compatibility in our code
+        api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
+        
+        if not api_key or api_key == "your_openai_api_key_here" or api_key.startswith("sk-proj-k3o"):
+            # Using the mock fallback if no valid key is present
+            return f"*(AI Generation disabled due to missing or invalid API key)*\n\nBased on the data provided, the metrics have been successfully calculated. Please refer to the deterministic Action Items and Rules Engine output below for the exact performance deviations."
             
         try:
-            client = openai.OpenAI(api_key=api_key)
+            # We use the OpenAI SDK but point it to Groq's free, blazing fast API!
+            client = openai.OpenAI(
+                api_key=api_key,
+                base_url="https://api.groq.com/openai/v1"
+            )
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="llama3-8b-8192",  # Groq's free Llama 3 model
                 messages=[
                     {"role": "system", "content": "You are a senior real estate business analyst and Chief of Staff. Synthesize structured data into highly professional, executive-ready insights. NEVER perform mathematical calculations. Only explain and contextualize the already calculated results provided to you."},
                     {"role": "user", "content": prompt}
@@ -40,8 +46,8 @@ class AIGenerator:
             )
             return response.choices[0].message.content
         except Exception as e:
-            logger.error(f"OpenAI API Error: {str(e)}")
-            return f"*(AI Generation disabled due to API quota limits)*\n\nBased on the data provided, the metrics have been successfully calculated. Please refer to the deterministic Action Items and Rules Engine output below for the exact performance deviations."
+            logger.error(f"Groq API Error: {str(e)}")
+            return f"*(AI Generation disabled due to API limits/errors)*\n\nBased on the data provided, the metrics have been successfully calculated. Please refer to the deterministic Action Items and Rules Engine output below for the exact performance deviations."
 
 # Node Functions
 
