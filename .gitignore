@@ -1,0 +1,33 @@
+# Environment & secrets - NEVER commit these
+.env
+
+# Python virtual environment
+venv/
+env/
+.venv/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Streamlit cache
+.streamlit/
+
+# Scratch/debug files
+scratch_debug.py
+columns_debug.json
+
+# Output directories (generated at runtime)
+output/
+reports/
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
