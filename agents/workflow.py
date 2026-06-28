@@ -25,6 +25,17 @@ class AIGenerator:
         # Check for GROQ API key first, then fallback to OPENAI API KEY for backward compatibility in our code
         api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
         
+        # Also check Streamlit secrets if running in Streamlit
+        if not api_key:
+            try:
+                import streamlit as st
+                if "GROQ_API_KEY" in st.secrets:
+                    api_key = st.secrets["GROQ_API_KEY"]
+                elif "OPENAI_API_KEY" in st.secrets:
+                    api_key = st.secrets["OPENAI_API_KEY"]
+            except Exception:
+                pass
+        
         if not api_key or api_key == "your_openai_api_key_here" or api_key.startswith("sk-proj-k3o"):
             # Using the mock fallback if no valid key is present
             return f"*(AI Generation disabled due to missing or invalid API key)*\n\nBased on the data provided, the metrics have been successfully calculated. Please refer to the deterministic Action Items and Rules Engine output below for the exact performance deviations."
@@ -36,7 +47,7 @@ class AIGenerator:
                 base_url="https://api.groq.com/openai/v1"
             )
             response = client.chat.completions.create(
-                model="llama3-8b-8192",  # Groq's free Llama 3 model
+                model="llama-3.1-8b-instant",  # Groq's new free Llama 3.1 model
                 messages=[
                     {"role": "system", "content": "You are a senior real estate business analyst and Chief of Staff. Synthesize structured data into highly professional, executive-ready insights. NEVER perform mathematical calculations. Only explain and contextualize the already calculated results provided to you."},
                     {"role": "user", "content": prompt}
